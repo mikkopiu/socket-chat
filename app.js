@@ -9,7 +9,7 @@ var io = socketio.listen(server);
 
 // # CONFIGS
 var port = 3000;
-var mongoHost = "http://localhost";
+var mongoHost = "localhost/socket-chat";
 var amountOfOldMsgsLoaded = 10;
 
 var users = {};
