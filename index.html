@@ -5,6 +5,11 @@
         body {
             margin: 0 auto;
             width: 350px;
+            padding-top: 10px;
+        }
+
+        #contentWrap {
+            display: none;
         }
 
         #chat {
@@ -13,30 +18,78 @@
             overflow-y: scroll;
             word-wrap: break-word;
         }
+
+        #chatWrap {
+            float: left;
+        }
     </style>
 </head>
 <body>
-    <div id="chat"></div>
-    <form id="send-message">
-        <input size="35" id="message"></input>
-        <input type="submit"></input>
-    </form>
+    <div id="nickWrap">
+        <p>Enter your preferred username</p>
+        <p id="nickError"></p>
+        <form id="setNick">
+            <input size="35" id="nickname"></input>
+            <input type="submit"></input>
+        </form>
+    </div>
+
+    <div id="contentWrap">
+        <div id="chatWrap">
+            <div id="chat"></div>
+            <form id="send-message">
+                <input size="35" id="message"></input>
+                <input type="submit"></input>
+            </form>
+        </div>
+        <div id="users"></div>
+    </div>
 
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(function ($) {
             var socket = io.connect();
+            var $nickForm = $('#setNick');
+            var $nickError = $('#nickError');
+            var $nickBox = $('#nickname');
+            var $users = $('#users');
             var $msgForm = $('#send-message');
             var $msgBox = $('#message');
             var $chat = $('#chat');
 
+            // When nickname-form is submitted, emit 'new user'
+            $nickForm.on('submit', function (e) {
+                e.preventDefault();
+                socket.emit('new user', $nickBox.val(), function (data) {
+                    $nickError.empty();
+                    if (data.isValid) {
+                        $('#nickWrap').slideUp(100);
+                        $('#contentWrap').slideDown(100);
+                    } else {
+                        $nickError.append('<p>' + 'Username already taken. Please try again.' + '</p>');
+                    }
+                });
+                $nickBox.val('');
+            });
+
+            // Emit typed message and clear the input
             $msgForm.on('submit', function (e) {
                 e.preventDefault();
                 socket.emit('send message', $msgBox.val());
                 $msgBox.val('');
             });
 
+            socket.on('usernames', function (data) {
+                var html = '';
+                data.forEach(function (item) {
+                    html += item + '<br>';
+                });
+                $users.empty();
+                $users.append('<p>' + html + '</p>');
+            });
+
+            // Append all new messages
             socket.on('new message', function (data) {
                 $chat.append(data + "<br>");
             });
