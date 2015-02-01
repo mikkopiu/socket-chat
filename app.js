@@ -1,21 +1,52 @@
 var express = require('express');
 var socketio = require('socket.io');
+var mongoose = require('mongoose');
 
 // Create base app and server
 var app = express();
 var server = require('http').createServer(app);
 var io = socketio.listen(server);
 
+// # CONFIGS
 var port = 3000;
+var mongoHost = "http://localhost/socket-chat";
+var amountOfOldMsgsLoaded = 10;
+
 var users = {};
 
 server.listen(port);
+
+mongoose.connect('mongodb://' + mongoHost, function (err) {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log('Connected to MongoDB succesfully!');
+    }
+});
+
+// MongoDB Schema
+var chatSchema = mongoose.Schema({
+    nickname: String,
+    msg: String,
+    created_at: {type: Date, default: Date.now}
+});
+
+var Chat = mongoose.model('Message', chatSchema);
 
 app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.html');
 });
 
 io.sockets.on('connection', function (socket) {
+    var query = Chat.find({});
+    query.sort('-created_at').limit(amountOfOldMsgsLoaded).exec(function (err, docs) {
+        if (err) {
+            throw err;
+        }
+
+        socket.emit('load old msgs', docs);
+    });
+
     socket.on('new user', function (data, callback) {
         // Don't allow already existing nicknames
         if (data in users) {
@@ -54,7 +85,14 @@ io.sockets.on('connection', function (socket) {
             }
 
         } else {
-            io.sockets.emit('new message', {msg: msg, nickname: socket.nickname}); // Send to everyone
+            var newMsg = new Chat({msg: msg, nickname: socket.nickname});
+            newMsg.save(function (err) {
+                if (err) {
+                    throw err;
+                } else {
+                    io.sockets.emit('new message', {msg: msg, nickname: socket.nickname}); // Send to everyone
+                }
+            });
         }
     });
 

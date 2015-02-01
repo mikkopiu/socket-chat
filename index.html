@@ -73,8 +73,8 @@
                 socket.emit('new user', $nickBox.val(), function (data) {
                     $nickError.empty();
                     if (data.isValid) {
-                        $('#nickWrap').slideUp(100);
-                        $('#contentWrap').slideDown(100);
+                        $('#nickWrap').slideUp(250);
+                        $('#contentWrap').slideDown(250);
                     } else {
                         $nickError.append('<p>' + 'Username already taken. Please try again.' + '</p>');
                     }
@@ -100,15 +100,26 @@
                 $users.append('<p>' + html + '</p>');
             });
 
+            // Load old messages
+            socket.on('load old msgs', function (docs) {
+                docs.reverse().forEach(function (data) {
+                    displayMessage(data);
+                });
+            });
+
             // Append all new messages
             socket.on('new message', function (data) {
-                $chat.append("<span class='msg'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
+                displayMessage(data);
             });
 
             // Whispers
             socket.on('whisper', function (data) {
                 $chat.append("<span class='msg whisper'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
             });
+
+            function displayMessage (data) {
+                $chat.append("<span class='msg'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
+            }
         });
     </script>
 </body>
