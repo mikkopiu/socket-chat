@@ -29,7 +29,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('send message', function (data) {
-        io.sockets.emit('new message', data); // Send to everyone
+        io.sockets.emit('new message', { nickname: socket.nickname, msg: data }); // Send to everyone
         // socket.broadcast.emit('new message', data); // Everyone, except this socket
     });
 
