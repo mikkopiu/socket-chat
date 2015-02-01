@@ -40,7 +40,11 @@ io.sockets.on('connection', function (socket) {
                 var msg = msg.substring(ind + 1);
 
                 if (name in users) {
-                    users[name].emit('whisper', {msg: msg, nick: socket.nickname}); // Emit message only to wanted user
+                    users[name].emit('whisper', {msg: msg, nickname: socket.nickname}); // Emit message only to wanted user
+
+                    if (socket.nickname !== name) {
+                        socket.emit('whisper', {msg: msg, nickname: socket.nickname}); // and to the sender
+                    }
                 } else {
                     callback('Error! Enter a valid user.');
                 }
@@ -48,6 +52,7 @@ io.sockets.on('connection', function (socket) {
             } else {
                 callback('Error! Please enter a message for your whisper.');
             }
+
         } else {
             io.sockets.emit('new message', {msg: msg, nickname: socket.nickname}); // Send to everyone
         }
