@@ -32,7 +32,6 @@
 
             $msgForm.on('submit', function (e) {
                 e.preventDefault();
-                console.log($msgBox.val());
                 socket.emit('send message', $msgBox.val());
                 $msgBox.val('');
             });
