@@ -1,7 +1,7 @@
 {
-    "name": "chat-tutorial",
+    "name": "socket-chat",
     "version": "0.0.1",
-    "description": "Socket.io chat based on tutorial from https://www.youtube.com/watch?v=pNKNYLv2BpQ",
+    "description": "Socket.io & Node.js based chat app",
     "keywords": ["node.js","socket.io","chat","tutorial"],
     "author": {
         "name": "Mikko Piuhola",
