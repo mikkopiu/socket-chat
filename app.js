@@ -7,7 +7,7 @@ var server = require('http').createServer(app);
 var io = socketio.listen(server);
 
 var port = 3000;
-var nicknames = [];
+var users = {};
 
 server.listen(port);
 
@@ -18,19 +18,39 @@ app.get('/', function (request, response) {
 io.sockets.on('connection', function (socket) {
     socket.on('new user', function (data, callback) {
         // Don't allow already existing nicknames
-        if (nicknames.indexOf(data) !== -1) {
+        if (data in users) {
             callback({isValid: false});
         } else {
             callback({isValid: true});
             socket.nickname = data;
-            nicknames.push(data);
+            users[socket.nickname] = socket;
             updateNicknames(); // Emit updated user-list
         }
     });
 
-    socket.on('send message', function (data) {
-        io.sockets.emit('new message', { nickname: socket.nickname, msg: data }); // Send to everyone
-        // socket.broadcast.emit('new message', data); // Everyone, except this socket
+    socket.on('send message', function (data, callback) {
+        var msg = data.trim();
+
+        // Check for whispers (direct message)
+        if (msg.substring(0,3) === "/w ") {
+            msg = msg.substring(3);
+            var ind = msg.indexOf(' ');
+            if (ind !== -1) {
+                var name = msg.substring(0, ind);
+                var msg = msg.substring(ind + 1);
+
+                if (name in users) {
+                    users[name].emit('whisper', {msg: msg, nick: socket.nickname}); // Emit message only to wanted user
+                } else {
+                    callback('Error! Enter a valid user.');
+                }
+
+            } else {
+                callback('Error! Please enter a message for your whisper.');
+            }
+        } else {
+            io.sockets.emit('new message', {msg: msg, nickname: socket.nickname}); // Send to everyone
+        }
     });
 
     socket.on('disconnect', function (data) {
@@ -38,11 +58,11 @@ io.sockets.on('connection', function (socket) {
             return;
         }
 
-        nicknames.splice(nicknames.indexOf(socket.nickname), 1);
+        delete users[socket.nickname];
         updateNicknames();
     });
 
     var updateNicknames = function () {
-        io.sockets.emit('usernames', nicknames);
+        io.sockets.emit('usernames', Object.keys(users)); // Don't send the whole object, just the nick
     };
 });

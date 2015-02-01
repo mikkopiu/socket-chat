@@ -22,6 +22,15 @@
         #chatWrap {
             float: left;
         }
+        
+        .error {
+            color: red;
+        }
+
+        .whisper {
+            color: grey;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -76,7 +85,9 @@
             // Emit typed message and clear the input
             $msgForm.on('submit', function (e) {
                 e.preventDefault();
-                socket.emit('send message', $msgBox.val());
+                socket.emit('send message', $msgBox.val(), function (data) {
+                    $chat.append("<span class='error'>" + data + "<br></span>");
+                });
                 $msgBox.val('');
             });
 
@@ -91,7 +102,12 @@
 
             // Append all new messages
             socket.on('new message', function (data) {
-                $chat.append("<b>" + data.nickname + "</b>: " + data.msg + "<br>");
+                $chat.append("<span class='msg'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
+            });
+
+            // Whispers
+            socket.on('whisper', function (data) {
+                $chat.append("<span class='msg whisper'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
             });
         });
     </script>
