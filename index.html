@@ -2,8 +2,16 @@
 <head>
     <title>Chat with socket.io & node.js</title>
     <style>
+        body {
+            margin: 0 auto;
+            width: 350px;
+        }
+
         #chat {
             height: 500px;
+            margin-bottom: 10px;
+            overflow-y: scroll;
+            word-wrap: break-word;
         }
     </style>
 </head>
@@ -19,11 +27,12 @@
         $(function ($) {
             var socket = io.connect();
             var $msgForm = $('#send-message');
-            var $msgBox = $('#messsage');
+            var $msgBox = $('#message');
             var $chat = $('#chat');
 
             $msgForm.on('submit', function (e) {
                 e.preventDefault();
+                console.log($msgBox.val());
                 socket.emit('send message', $msgBox.val());
                 $msgBox.val('');
             });
