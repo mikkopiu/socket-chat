@@ -38,14 +38,6 @@ app.get('/', function (request, response) {
 });
 
 io.sockets.on('connection', function (socket) {
-    var query = Chat.find({});
-    query.sort('-created_at').limit(amountOfOldMsgsLoaded).exec(function (err, docs) {
-        if (err) {
-            throw err;
-        }
-
-        socket.emit('load old msgs', docs);
-    });
 
     socket.on('new user', function (data, callback) {
         // Don't allow already existing nicknames
