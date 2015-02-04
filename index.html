@@ -39,7 +39,7 @@
         <p id="nickError"></p>
         <form id="setNick">
             <input size="35" id="nickname"></input>
-            <input type="submit"></input>
+            <input type="submit">Submit</input>
         </form>
     </div>
 
@@ -48,13 +48,13 @@
             <div id="chat"></div>
             <form id="send-message">
                 <input size="35" id="message"></input>
-                <input type="submit"></input>
+                <input type="submit">Submit</input>
             </form>
         </div>
         <div id="users"></div>
     </div>
 
-    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="lib/jquery-1.11.2.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(function ($) {
@@ -117,7 +117,7 @@
                 $chat.append("<span class='msg whisper'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
             });
 
-            function displayMessage (data) {
+            var displayMessage = function (data) {
                 $chat.append("<span class='msg'><b>" + data.nickname + "</b>: " + data.msg + "<br></span>");
             }
         });
