@@ -18,15 +18,13 @@ app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.html');
 });
 
-// Serve lib files statically
-app.use('/lib', express.static(__dirname + '/lib'));
-
-// Respond to errors
-app.use(function (err, request, response, next) {
-    console.error(err.stack);
-    response.status(500).send('Something broke!');
+// Catch-all route
+app.get('*', function (request, response) {
+    response.status(404).send('Where are you going?');
 });
 
+// Serve lib files statically
+app.use('/lib', express.static(__dirname + '/lib'));
 
 // ## MongoDB setup
 mongoose.connect('mongodb://' + mongoHost, function (err) {
