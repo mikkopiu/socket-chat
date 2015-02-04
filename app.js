@@ -14,13 +14,17 @@ var server = http.createServer(app);
 var io = socket.listen(server);
 var users = {}; 
 
-app.get('/', function (request, response) {
-    response.sendFile(__dirname + '/index.html');
+// Middleware
+app.use(app.router);
+app.use(function (err, request, response, next) {
+    if (!err) return next();
+    console.error(err.stack);
+    response.status(500).send("Something broke...");
 });
 
-// Catch-all route
-app.get('*', function (request, response) {
-    response.status(404).send('Where are you going?');
+// Routes
+app.get('/', function (request, response) {
+    response.sendFile(__dirname + '/index.html');
 });
 
 // Serve lib files statically
