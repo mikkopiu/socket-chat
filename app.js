@@ -14,7 +14,9 @@ var amountOfOldMsgsLoaded = 10;
 
 var users = {};
 
-server.listen(port);
+app.use(express.compress());
+
+server.listen(process.env.PORT || port);
 
 mongoose.connect('mongodb://' + mongoHost, function (err) {
     if (err) {
@@ -36,6 +38,8 @@ var Chat = mongoose.model('Message', chatSchema);
 app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.html');
 });
+
+app.use('/lib', express.static(__dirname + '/lib'));
 
 io.sockets.on('connection', function (socket) {
 
