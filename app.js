@@ -18,7 +18,7 @@ app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.html');
 });
 
-// Server lib files statically
+// Serve lib files statically
 app.use('/lib', express.static(__dirname + '/lib'));
 
 // Respond to errors
