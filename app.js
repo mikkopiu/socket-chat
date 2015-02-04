@@ -1,21 +1,34 @@
 var express = require('express');
-var socketio = require('socket.io');
+var socket = require('socket.io');
 var mongoose = require('mongoose');
+var http = require('http');
 
-// Create base app and server
-var app = express();
-var server = require('http').createServer(app);
-var io = socketio.listen(server);
-
-// # CONFIGS
+// ## CONFIGS
 var port = 3000;
 var mongoHost = "localhost/socket-chat";
-var amountOfOldMsgsLoaded = 10;
 
+
+// ## Server setup
+var app = express();
+var server = http.createServer(app);
+var io = socket.listen(server);
 var users = {}; 
 
-server.listen(process.env.PORT || port);
+app.get('/', function (request, response) {
+    response.sendFile(__dirname + '/index.html');
+});
 
+// Server lib files statically
+app.use('/lib', express.static(__dirname + '/lib'));
+
+// Respond to errors
+app.use(function (err, request, response, next) {
+    console.error(err.stack);
+    response.status(500).send('Something broke!');
+});
+
+
+// ## MongoDB setup
 mongoose.connect('mongodb://' + mongoHost, function (err) {
     if (err) {
         console.error(err);
@@ -33,14 +46,11 @@ var chatSchema = mongoose.Schema({
 
 var Chat = mongoose.model('Message', chatSchema);
 
-app.get('/', function (request, response) {
-    response.sendFile(__dirname + '/index.html');
-});
 
-app.use('/lib', express.static(__dirname + '/lib'));
-
+// ## Socket.io setup
 io.sockets.on('connection', function (socket) {
 
+    // Handle new users
     socket.on('new user', function (data, callback) {
         // Don't allow already existing nicknames
         if (data in users) {
@@ -53,6 +63,7 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    // Handle messages
     socket.on('send message', function (data, callback) {
         var msg = data.trim();
 
@@ -90,6 +101,7 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    // Delete users on disconnect
     socket.on('disconnect', function (data) {
         if (!socket.nickname) {
             return;
@@ -99,7 +111,13 @@ io.sockets.on('connection', function (socket) {
         updateNicknames();
     });
 
+    /**
+     * Emit updated list of usernames
+     */
     var updateNicknames = function () {
         io.sockets.emit('usernames', Object.keys(users)); // Don't send the whole object, just the nick
     };
 });
+
+// Start listening
+server.listen(process.env.PORT || port);
