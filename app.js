@@ -15,7 +15,6 @@ var io = socket.listen(server);
 var users = {}; 
 
 // Middleware
-app.use(app.router);
 app.use(function (err, request, response, next) {
     if (!err) return next();
     console.error(err.stack);
