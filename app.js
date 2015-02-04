@@ -22,12 +22,13 @@ app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.html');
 });
 
+// Serve lib files statically
+app.use('/lib', express.static(__dirname + '/lib'));
+
+// Catch-all route
 app.all('*', function (request, response) {
     response.status(404).send('Where are you going?');
 });
-
-// Serve lib files statically
-app.use('/lib', express.static(__dirname + '/lib'));
 
 // ## MongoDB setup
 mongoose.connect('mongodb://' + mongoHost, function (err) {
