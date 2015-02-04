@@ -12,9 +12,7 @@ var port = 3000;
 var mongoHost = "localhost/socket-chat";
 var amountOfOldMsgsLoaded = 10;
 
-var users = {};
-
-app.use(express.compress());
+var users = {}; 
 
 server.listen(process.env.PORT || port);
 
