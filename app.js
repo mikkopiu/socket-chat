@@ -1,4 +1,5 @@
 var express = require('express');
+var compression = require('compression');
 var socket = require('socket.io');
 var mongoose = require('mongoose');
 var http = require('http');
@@ -12,18 +13,17 @@ var mongoHost = "localhost/socket-chat";
 var app = express();
 var server = http.createServer(app);
 var io = socket.listen(server);
-var users = {}; 
+var users = {};
 
-// Middleware
-app.use(function (err, request, response, next) {
-    if (!err) return next();
-    console.error(err.stack);
-    response.status(500).send("Something broke...");
-});
+app.use(compression());
 
 // Routes
 app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.html');
+});
+
+app.all('*', function (request, response) {
+    response.status(404).send('Where are you going?');
 });
 
 // Serve lib files statically
